@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Party Overview · {{ party.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-0">{{ party.title }}</h1>
+    <p class="text-muted mb-0">{{ party.event_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('admin.manage_parties') }}">All parties</a>
+    <a class="btn btn-primary" href="{{ url_for('admin.edit_party', party_id=party.id) }}">Edit party</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Total spots</p>
+        <p class="h4 mb-0">{{ party.total_spots }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Available</p>
+        <p class="h4 mb-0">{{ party.spots_remaining }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Paid tickets</p>
+        <p class="h4 mb-0">{{ paid }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Revenue</p>
+        <p class="h4 mb-0">{{ '$%.2f' % revenue }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="h5 mb-0">Registrations</h2>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('admin.export_registrations') }}" class="btn btn-sm btn-outline-secondary">Export CSV</a>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Family</th>
+              <th>Contact</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Registered On</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registration in registrations %}
+              <tr>
+                <td>{{ registration.family_name }}</td>
+                <td>
+                  {{ registration.family_email }}<br>
+                  <small class="text-muted">{{ registration.family_phone or '—' }}</small>
+                </td>
+                <td>{{ registration.quantity }}</td>
+                <td>
+                  <span class="badge {% if registration.status.value == 'paid' %}bg-success{% elif registration.status.value == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                    {{ registration.status.value.title() }}
+                  </span>
+                </td>
+                <td>{{ registration.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted">No registrations yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="h5 mb-0">Import registrations</h2>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">Upload a CSV exported from the fundraiser sign-up sheet to pre-fill attendees.</p>
+        <form method="post" action="{{ url_for('admin.import_registrations') }}" enctype="multipart/form-data">
+          {{ import_form.csrf_token }}
+          {{ import_form.party_id() }}
+          <div class="mb-3">
+            {{ import_form.file(class="form-control") }}
+            <div class="form-text">Columns supported: family_name, family_email, family_phone, quantity, status, amount_cents.</div>
+            {% for error in import_form.file.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Import CSV</button>
+        </form>
+      </div>
+    </div>
+    <div class="card shadow-sm mt-4">
+      <div class="card-header">
+        <h2 class="h6 mb-0">Host Contact</h2>
+      </div>
+      <div class="card-body">
+        <p class="mb-1"><strong>{{ party.host_contact_name or 'Not set' }}</strong></p>
+        <p class="mb-1">{{ party.host_contact_email or '—' }}</p>
+        <p class="mb-0">{{ party.host_contact_phone or '—' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

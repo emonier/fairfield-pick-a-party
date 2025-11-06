@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout · Pick-A-Party{% endblock %}
+
+{% block head %}
+  {% if square_application_id %}
+    {% if square_environment == 'sandbox' %}
+      <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
+    {% else %}
+      <script src="https://web.squarecdn.com/v1/square.js"></script>
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <h1 class="h3 mb-4">Checkout</h1>
+    <p class="text-muted">One more step! Provide your family details and payment information to secure your spots.</p>
+
+    {% if not square_application_id or not square_location_id %}
+      <div class="alert alert-warning">
+        Square configuration is missing. Please contact the administrator to enable online payments.
+      </div>
+    {% endif %}
+
+    <form id="checkout-form" method="post" novalidate>
+      {{ form.csrf_token }}
+      <div class="mb-3">
+        {{ form.family_name.label(class="form-label") }}
+        {{ form.family_name(class="form-control", placeholder="The Smith Family", required=true) }}
+      </div>
+      <div class="mb-3">
+        {{ form.family_email.label(class="form-label") }}
+        {{ form.family_email(class="form-control", placeholder="family@email.com", required=true) }}
+      </div>
+      <div class="mb-3">
+        {{ form.family_phone.label(class="form-label") }}
+        {{ form.family_phone(class="form-control", placeholder="(555) 123-4567") }}
+      </div>
+      <div class="form-check mb-4">
+        {{ form.expose_contact(class="form-check-input", id="expose_contact") }}
+        <label class="form-check-label" for="expose_contact">
+          Share my contact info with the party hosts so they can send logistics updates.
+        </label>
+      </div>
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Payment Details</h2>
+          <div id="payment-status" class="alert d-none" role="alert"></div>
+          <div id="card-container"></div>
+          <button id="card-button" class="btn btn-primary w-100 mt-4" type="submit" {% if not square_application_id %}disabled{% endif %}>
+            Pay {{ '$%.2f' % (totals.subtotal | float) }}
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <a href="{{ url_for('family.view_cart') }}" class="btn btn-link">Back to cart</a>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Order Summary</h2>
+        <ul class="list-group list-group-flush mb-3">
+          {% for item in items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ item.party.title }}</strong><br>
+                <small class="text-muted">{{ item.quantity }} × {{ '$%.2f' % (item.unit_price_cents / 100) }}</small>
+              </div>
+              <span>{{ '$%.2f' % (item.total_cents / 100) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="d-flex justify-content-between">
+          <span class="fw-semibold">Total Due</span>
+          <span class="fw-semibold">{{ '$%.2f' % (totals.subtotal | float) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    window.squareConfig = {
+      applicationId: {{ square_application_id|tojson }},
+      locationId: {{ square_location_id|tojson }},
+      environment: {{ square_environment|tojson }}
+    };
+  </script>
+  <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+{% endblock %}
+

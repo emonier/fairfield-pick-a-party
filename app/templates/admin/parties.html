@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Parties · Pick-A-Party{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-0">Manage Parties</h1>
+    <p class="text-muted mb-0">Create new experiences or update existing ones.</p>
+  </div>
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">Back to dashboard</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="h5 mb-0">Add a Party</h2>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {{ form.csrf_token }}
+          <div class="mb-3">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control", placeholder="Name of the party") }}
+            {% for error in form.title.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", rows=4) }}
+            {% for error in form.description.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.event_date.label(class="form-label") }}
+            {{ form.event_date(class="form-control") }}
+            {% for error in form.event_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.price_cents.label(class="form-label") }}
+                {{ form.price_cents(class="form-control", placeholder="e.g. 2500") }}
+                <div class="form-text">Enter amount in cents (2500 = $25.00)</div>
+                {% for error in form.price_cents.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.price_unit.label(class="form-label") }}
+                {{ form.price_unit(class="form-select") }}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.total_spots.label(class="form-label") }}
+                {{ form.total_spots(class="form-control") }}
+                {% for error in form.total_spots.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.max_tickets_per_order.label(class="form-label") }}
+                {{ form.max_tickets_per_order(class="form-control") }}
+                {% for error in form.max_tickets_per_order.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            {{ form.host_contact_name.label(class="form-label") }}
+            {{ form.host_contact_name(class="form-control") }}
+          </div>
+          <div class="mb-3">
+            {{ form.host_contact_email.label(class="form-label") }}
+            {{ form.host_contact_email(class="form-control") }}
+            {% for error in form.host_contact_email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.host_contact_phone.label(class="form-label") }}
+            {{ form.host_contact_phone(class="form-control") }}
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Create Party</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card shadow-sm h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="h5 mb-0">Existing Parties</h2>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Date</th>
+              <th>Price</th>
+              <th>Spots</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for party in parties %}
+              <tr>
+                <td>{{ party.title }}</td>
+                <td>{{ party.event_date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                <td>{{ '$%.2f' % (party.price_cents / 100) }}</td>
+                <td>{{ party.spots_remaining }} / {{ party.total_spots }}</td>
+                <td class="text-end">
+                  <div class="btn-group">
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.view_party', party_id=party.id) }}">View</a>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_party', party_id=party.id) }}">Edit</a>
+                    <form method="post" action="{{ url_for('admin.delete_party', party_id=party.id) }}" onsubmit="return confirm('Delete this party?');">
+                      {{ csrf_token() }}
+                      <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted">No parties created yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
