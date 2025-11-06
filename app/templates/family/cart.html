@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Your Cart · Pick-A-Party{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">Your Cart</h1>
+
+{% if not items %}
+  <div class="alert alert-info">Your cart is empty. Head back to the <a href="{{ url_for('family.home') }}">party list</a> to add some fun!</div>
+{% else %}
+  <div class="table-responsive mb-4">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th scope="col">Party</th>
+          <th scope="col">Date</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Price</th>
+          <th scope="col">Total</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>{{ item.party.title }}</td>
+            <td>{{ item.party.event_date.strftime('%b %d, %Y %I:%M %p') }}</td>
+            <td style="max-width: 140px;">
+              <form method="post" action="{{ url_for('family.update_cart', party_id=item.party.id) }}" class="d-flex gap-2">
+                {{ csrf_token() }}
+                <input type="number" name="quantity" class="form-control" min="0" max="{{ item.party.max_tickets_per_order }}" value="{{ item.quantity }}">
+                <button class="btn btn-outline-secondary" type="submit">Update</button>
+              </form>
+            </td>
+            <td>{{ '$%.2f' % (item.unit_price_cents / 100) }}</td>
+            <td>{{ '$%.2f' % (item.total_cents / 100) }}</td>
+            <td class="text-end">
+              <a href="{{ url_for('family.remove_from_cart', party_id=item.party.id) }}" class="btn btn-link text-danger">Remove</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <p class="fs-5 mb-0">Subtotal: <strong>{{ '$%.2f' % (totals.subtotal | float) }}</strong></p>
+      <small class="text-muted">{{ totals.total_quantity }} ticket(s) total</small>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('family.home') }}">Continue Browsing</a>
+      <a class="btn btn-primary" href="{{ url_for('family.checkout') }}">Proceed to Checkout</a>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+

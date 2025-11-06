@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login · Pick-A-Party{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h4 mb-3">Administrator Login</h1>
+        <p class="text-muted">Sign in to manage parties, attendees, and payments.</p>
+        <form method="post">
+          {{ form.csrf_token }}
+          <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", placeholder="you@school.org", autofocus=true) }}
+            {% for error in form.email.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", placeholder="Password") }}
+            {% for error in form.password.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Sign In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

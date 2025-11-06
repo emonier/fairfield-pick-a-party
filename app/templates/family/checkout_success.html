@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Thank You · Pick-A-Party{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h3 mb-3">Thank you, {{ order.family_name }}!</h1>
+        <p class="text-muted">Your payment (confirmation {{ order.payment_id }}) has been received. A receipt will be emailed to {{ order.family_email }}.</p>
+        {% if not order.paid %}
+          <div class="alert alert-warning">Square is still finalizing your payment. We'll email you once it is fully completed.</div>
+        {% endif %}
+
+        <h2 class="h5 mt-4">Parties secured</h2>
+        <ul class="list-group list-group-flush mb-3">
+          {% for item in items %}
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <strong>{{ item.party_title }}</strong><br>
+                  <small class="text-muted">
+                    {{ item.quantity }} ticket(s)
+                    {% if item.event_date %}
+                      · {{ item.event_date.strftime('%B %d, %Y at %I:%M %p') }}
+                    {% endif %}
+                  </small>
+                </div>
+                <div class="text-end">
+                  {% if item.host_name or item.host_email %}
+                    <small class="text-muted">Host contact</small><br>
+                    <span>{{ item.host_name or '—' }}</span><br>
+                    <span>{{ item.host_email or '—' }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="border rounded p-3 mb-3 bg-light">
+          <div class="d-flex justify-content-between">
+            <span class="fw-semibold">Total paid</span>
+            <span class="fw-semibold">{{ '$%.2f' % (total | float) }}</span>
+          </div>
+        </div>
+
+        <p class="mb-4">We'll make sure the party hosts receive your contact information so they can follow up with logistics. You can keep exploring other parties any time.</p>
+
+        <a href="{{ url_for('family.home') }}" class="btn btn-primary">Browse more parties</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

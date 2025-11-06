@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Registrations · Pick-A-Party{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-0">Registrations</h1>
+    <p class="text-muted mb-0">Recent family sign-ups across all parties.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.export_registrations') }}" class="btn btn-outline-secondary">Export CSV</a>
+    <a href="{{ url_for('admin.manage_parties') }}" class="btn btn-primary">Manage parties</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Party</th>
+              <th>Family</th>
+              <th>Contact</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Recorded</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registration in registrations %}
+              <tr>
+                <td><a href="{{ url_for('admin.view_party', party_id=registration.party_id) }}">{{ registration.party.title }}</a></td>
+                <td>{{ registration.family_name }}</td>
+                <td>
+                  {{ registration.family_email }}<br>
+                  <small class="text-muted">{{ registration.family_phone or '—' }}</small>
+                </td>
+                <td>{{ registration.quantity }}</td>
+                <td>
+                  <span class="badge {% if registration.status.value == 'paid' %}bg-success{% elif registration.status.value == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                    {{ registration.status.value.title() }}
+                  </span>
+                </td>
+                <td>{{ registration.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center text-muted">No registrations found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="h5 mb-0">Import CSV</h2>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('admin.import_registrations') }}" enctype="multipart/form-data">
+          {{ import_form.csrf_token }}
+          <div class="mb-3">
+            {{ import_form.party_id.label(class="form-label") }}
+            {{ import_form.party_id(class="form-select") }}
+          </div>
+          <div class="mb-3">
+            {{ import_form.file(class="form-control") }}
+            <div class="form-text">Requires columns: family_name, family_email, quantity, status, amount_cents (optional).</div>
+            {% for error in import_form.file.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Upload</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

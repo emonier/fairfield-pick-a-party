@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Party · {{ party.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-0">Edit Party</h1>
+    <p class="text-muted mb-0">Update details for {{ party.title }}.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.view_party', party_id=party.id) }}" class="btn btn-outline-secondary">Back to party</a>
+    <a href="{{ url_for('admin.manage_parties') }}" class="btn btn-outline-primary">All parties</a>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="post">
+      {{ form.csrf_token }}
+      <div class="mb-3">
+        {{ form.title.label(class="form-label") }}
+        {{ form.title(class="form-control") }}
+        {% for error in form.title.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(class="form-control", rows=5) }}
+        {% for error in form.description.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.event_date.label(class="form-label") }}
+        {{ form.event_date(class="form-control") }}
+        {% for error in form.event_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            {{ form.price_cents.label(class="form-label") }}
+            {{ form.price_cents(class="form-control") }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            {{ form.price_unit.label(class="form-label") }}
+            {{ form.price_unit(class="form-select") }}
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            {{ form.total_spots.label(class="form-label") }}
+            {{ form.total_spots(class="form-control") }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            {{ form.max_tickets_per_order.label(class="form-label") }}
+            {{ form.max_tickets_per_order(class="form-control") }}
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        {{ form.host_contact_name.label(class="form-label") }}
+        {{ form.host_contact_name(class="form-control") }}
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            {{ form.host_contact_email.label(class="form-label") }}
+            {{ form.host_contact_email(class="form-control") }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            {{ form.host_contact_phone.label(class="form-label") }}
+            {{ form.host_contact_phone(class="form-control") }}
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Save changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
